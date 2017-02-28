@@ -8,10 +8,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -23,7 +24,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -180,42 +180,15 @@ public class MainActivity extends AppCompatActivity {
     private void shareDrawing() {
         mCustomView.setDrawingCacheEnabled(true);
         mCustomView.invalidate();
-        String path = Environment.getExternalStorageDirectory().toString();
-        OutputStream fOut = null;
-        File file = new File(path,
-                "android_drawing_app.jpg");
-        file.getParentFile().mkdirs();
 
-        try {
-            file.createNewFile();
-        } catch (Exception e) {
-            Log.e(LOG_CAT, e.getCause() + e.getMessage());
-        }
+        File drawingPath = new File(getCacheDir(), "drawings");
+        File newDrawing = new File(drawingPath, "android_drawing_app.jpg");
 
-        try {
-            fOut = new FileOutputStream(file);
-        } catch (Exception e) {
-            Log.e(LOG_CAT, e.getCause() + e.getMessage());
-        }
+       Uri contentUri = FileProvider.getUriForFile(this, BuildConfig.FILES_AUTHORITY, newDrawing);
 
-        if (mCustomView.getDrawingCache() == null) {
-            Log.e(LOG_CAT,"Unable to get drawing cache ");
-        }
-
-        mCustomView.getDrawingCache()
-                .compress(Bitmap.CompressFormat.JPEG, 85, fOut);
-
-        try {
-            fOut.flush();
-            fOut.close();
-        } catch (IOException e) {
-            Log.e(LOG_CAT, e.getCause() + e.getMessage());
-        }
-
-        Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_STREAM,Uri.fromFile(file));
-        shareIntent.setType("image/jpg");
+        Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+                .setType("image/jpg").setStream(contentUri).getIntent();
+        shareIntent.setData(contentUri);
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "Share image"));
 

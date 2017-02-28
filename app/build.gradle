@@ -10,6 +10,15 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+
+
+        def filesAuthorityValue = applicationId + ".files"
+
+        //Now you can use ${filesAuthority} in your manifest
+        manifestPlaceholders = [filesAuthority: filesAuthorityValue]
+
+        //Now you can use BuildConfig.FILES_AUTHORITY in our code
+        buildConfigField "String", "FILES_AUTHORITY", "\"${filesAuthorityValue}\""
     }
     buildTypes {
         release {

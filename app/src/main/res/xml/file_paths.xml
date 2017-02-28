@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--new File(getCacheDir(), "images")-->
+    <cache-path name="image_cache" path="drawings/" />
+</paths>
